@@ -4,89 +4,79 @@ using System.Collections;
 
 public class GameCntrl : MonoBehaviour {
 
-	private GameObject block;
-	private GameObject [] blocks = new GameObject[4];
+	private float score;
 
-	private int score;
+	private GameObject [] colorObjects = new GameObject[4];
 
 	public GameObject ColorObjectPref;
 	public Vector3 [] Positions;
 	public Text ScoreText;
-
-	[HideInInspector]
-	public bool isNext = false;
-	public bool isLose = false;
 	
 	void Start () 
 	{
 		score = 0;
-		ScoreText.text = score.ToString ();
+		ScoreText.text = "Match the color";
 
-		InitColorObj ();
-
-		SetRandomRight ((int) Random.Range (0, Positions.Length));
-	}
-
-	void Update () 
-	{
-		if (isLose)
-			{ ScoreText.text = "Game Over \n You score is:" + score.ToString (); }
-		else if (isNext)
-		{ 
-			score++;
-			ScoreText.text = score.ToString ();
-
-			NextLevel (); 
-		}
+		InitColorObj ();	
 	}
 
 	void InitColorObj () 
 	{
 		for (int i = 0; i < Positions.Length; i++) 
 		{
-			blocks [i] = Instantiate (ColorObjectPref, Positions[i], Quaternion.identity) as GameObject;
+			colorObjects [i] = Instantiate (ColorObjectPref, Positions[i], Quaternion.identity) as GameObject;
 		}
+
+		RandomizeColors ();
 	}
 
-	void SetRandomRight (int right) 
+	void RandomizeColors ()
 	{
-		blocks[right].GetComponent <ColorObject> ().isRight = true;
-	}
+		Color randColor = Random.ColorHSV (0f, 1f, 
+										   0.2f, 1f, 
+										   0.2f, 1f);
 
-	void NextLevel () 
-	{
-		isNext = false;
+		float randRange = -(.045f)*score + 1f;
+		// float randRange = 2.55f/score;
 
-		Color aColor = new Vector4 (Random.Range (0.1f, 1f), Random.Range (0.1f, 1f), Random.Range (0.1f, 1f), 1);
-		GameObject.Find ("MainColorObject").GetComponent <Renderer> ().material.color = aColor;
+		GameObject.Find ("MainColorObject").GetComponent <ColorObject> ().RandomizeColors (randColor, randRange);
 
-		int rand = Random.Range (0, Positions.Length);
-		
-		float randColorCoef = 0;
-		if (score < 5) 
-			{ randColorCoef = 0.4f; }
-		else if (score >= 5 && score < 10) 
-			{ randColorCoef = 0.3f; }
-		else if (score >= 10) 
-			{ randColorCoef = 0.2f; }
+		SetRandomRight ();
 
 		for (int i = 0; i < Positions.Length; i++) 
 		{
-			if (i == rand)
-			{ 
-				SetRandomRight (rand);
+			colorObjects[i].GetComponent <ColorObject> ().RandomizeColors (randColor, randRange);
+		}		
+	}
 
-				blocks [i].GetComponent <Renderer> ().material.color = aColor; 
-			}
+	void SetRandomRight () 
+	{
+		int right = Random.Range (0, Positions.Length); 
+
+		for (int i = 0; i < Positions.Length; i++) 
+		{
+			if (i == right)
+				{ colorObjects[i].GetComponent <ColorObject> ().isRight = true; }
 			else 
-			{
-				blocks [i].GetComponent <ColorObject> ().isRight = false;
-
-				float r = aColor.r + Random.Range (0.1f, randColorCoef) > 1f ? 1f : aColor.r + Random.Range (0.1f, randColorCoef);
-				float g = aColor.g + Random.Range (0.1f, randColorCoef) > 1f ? 1f : aColor.g + Random.Range (0.1f, randColorCoef);
-				float b = aColor.b + Random.Range (0.1f, randColorCoef) > 1f ? 1f : aColor.b + Random.Range (0.1f, randColorCoef);
-				blocks [i].GetComponent <Renderer> ().material.color = new Vector4 (r, g, b, aColor.a);
-			}
+				{ colorObjects[i].GetComponent <ColorObject> ().isRight = false; }
 		}
+	}
+
+	public void GameOver ()
+	{
+		ScoreText.text = "Game over\nYour score is: " + score.ToString ();
+
+		for (int i = 0; i < Positions.Length; i++) 
+		{
+			colorObjects[i].GetComponent <ColorObject> ().isEnable = false;
+		}
+	}
+
+	public void NextLevel () 
+	{
+		score++;
+		ScoreText.text = score.ToString ();
+
+		RandomizeColors ();
 	}	
 }
