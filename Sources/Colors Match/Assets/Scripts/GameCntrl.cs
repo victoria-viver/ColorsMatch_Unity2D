@@ -4,13 +4,13 @@ using System.Collections;
 
 public class GameCntrl : MonoBehaviour {
 
-	private float score;
+	float 			score;
+	GameObject [] 	colorObjects = new GameObject[4];
 
-	private GameObject [] colorObjects = new GameObject[4];
-
-	public GameObject ColorObjectPref;
-	public Vector3 [] Positions;
-	public Text ScoreText;
+	public GameObject   ColorObjectPref;
+	public Vector3 []   Positions;
+	public Text 		ScoreText;
+	public Button 		RestartBtn;
 	
 	void Start () 
 	{
@@ -18,6 +18,10 @@ public class GameCntrl : MonoBehaviour {
 		ScoreText.text = "Match the color";
 
 		InitColorObj ();	
+
+		RestartBtn.GetComponent<Button>().onClick.AddListener(Restart);
+
+		RestartBtn.gameObject.SetActive(false);
 	}
 
 	void InitColorObj () 
@@ -36,16 +40,15 @@ public class GameCntrl : MonoBehaviour {
 										   0.2f, 1f, 
 										   0.2f, 1f);
 
-		float randRange = -(.045f)*score + 1f;
-		// float randRange = 2.55f/score;
+		float randRange = -.005f*score + 1f;
 
-		GameObject.Find ("MainColorObject").GetComponent <ColorObject> ().RandomizeColors (randColor, randRange);
+		GameObject.Find ("MainColorObject").GetComponent <ColorObject> ().SetColor (randColor, randRange);
 
 		SetRandomRight ();
 
 		for (int i = 0; i < Positions.Length; i++) 
 		{
-			colorObjects[i].GetComponent <ColorObject> ().RandomizeColors (randColor, randRange);
+			colorObjects[i].GetComponent <ColorObject> ().SetColor (randColor, randRange);
 		}		
 	}
 
@@ -70,6 +73,8 @@ public class GameCntrl : MonoBehaviour {
 		{
 			colorObjects[i].GetComponent <ColorObject> ().isEnable = false;
 		}
+
+		RestartBtn.gameObject.SetActive(true);
 	}
 
 	public void NextLevel () 
@@ -79,4 +84,19 @@ public class GameCntrl : MonoBehaviour {
 
 		RandomizeColors ();
 	}	
+
+	void Restart ()
+	{
+		RestartBtn.gameObject.SetActive(false);
+
+		score = 0;
+		ScoreText.text = score.ToString ();
+
+		for (int i = 0; i < Positions.Length; i++) 
+		{
+			colorObjects[i].GetComponent <ColorObject> ().isEnable = true;
+		}
+
+		RandomizeColors ();
+	}
 }

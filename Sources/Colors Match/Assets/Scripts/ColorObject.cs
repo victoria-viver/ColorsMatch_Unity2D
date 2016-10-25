@@ -3,12 +3,11 @@ using System.Collections;
 
 public class ColorObject : MonoBehaviour 
 {
-	bool isMain = false;
-
-	GameCntrl GameController;
+	bool 		isMain = false;
+	GameCntrl 	GameController;
 
 	[HideInInspector] 
-	public bool isRight = false;
+	public bool isRight  = false;
 	public bool isEnable = true;
 
 	void Awake () 
@@ -29,14 +28,28 @@ public class ColorObject : MonoBehaviour
 			{ GameController.GameOver (); }	
 	}
 
-	public void RandomizeColors (Color randColor, float randRange)
+	public void SetColor (Color randColor, float randRange)
 	{
 		if (isMain || isRight)
-			{ GetComponent <Renderer> ().material.color = randColor; }
+		{ 
+			GetComponent <Renderer> ().material.color = randColor; 			
+		}
 		else
-			{ GetComponent <Renderer> ().material.color = new Vector4 (Random.Range (randColor.r - randRange > 0 ? randColor.r - randRange : 0, randColor.r + randRange < 1 ? randColor.r + randRange : 1),
-																	   Random.Range (randColor.g - randRange > 0 ? randColor.g - randRange : 0, randColor.g + randRange < 1 ? randColor.g + randRange : 1),
-																	   Random.Range (randColor.b - randRange > 0 ? randColor.b - randRange : 0, randColor.b + randRange < 1 ? randColor.b + randRange : 1),
-																	   randColor.a); }
+		{ 
+			float hue = 0f;
+			float sat = 0f;
+			float val  = 0f;
+
+			Color.RGBToHSV (randColor, out hue, out sat, out val);
+
+			Color aColor = Random.ColorHSV (hue, 
+											hue, 
+											sat - randRange > 0 ? sat - randRange : 0,
+											sat + randRange < 1 ? sat + randRange : 1,
+											val - randRange > 0 ? val - randRange : 0,
+											val + randRange < 1 ? val + randRange : 1);
+
+			GetComponent <Renderer> ().material.color = aColor;
+		}
 	}
 }
