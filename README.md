@@ -1,2 +1,2 @@
 # ColorsMatch_Unity2D
-Colors Match Game
+Unity2D Colors Match Game
